@@ -52,7 +52,7 @@ const Dashboard = () => {
         <p className="text-sm font-bold text-primary-700 dark:text-primary-400 uppercase tracking-widest leading-none">
           {formatDate(new Date())}
         </p>
-        <h1 className="text-5xl md:text-5xl font-headline font-black text-zinc-900 dark:text-zinc-50 tracking-tighter leading-tight mt-1">
+        <h1 className="text-4xl md:text-5xl font-headline font-black text-zinc-900 dark:text-zinc-50 tracking-tighter leading-tight mt-1">
           Welcome back, <br className="md:hidden" />
           <span className="text-primary-600">{userName}</span>
         </h1>
@@ -91,7 +91,7 @@ const Dashboard = () => {
             <Link
               key={journal.id}
               to={`/edit/${journal.id}`}
-              className="block bg-white dark:bg-zinc-900 p-5 rounded-3xl shadow-premium border border-zinc-50 dark:border-zinc-800/50 active:scale-[0.98] transition-all h-auto"
+              className="group block bg-white dark:bg-zinc-900 p-6 rounded-[32px] shadow-premium border border-zinc-100/50 dark:border-zinc-800/50 active:scale-[0.98] transition-all min-h-[280px] flex flex-col"
             >
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
@@ -109,13 +109,13 @@ const Dashboard = () => {
                 )}
               </div>
 
-              <p className="text-zinc-500 dark:text-zinc-400 text-sm md:text-base leading-relaxed line-clamp-3 mb-4 font-body">
+              <p className="text-zinc-500 dark:text-zinc-400 text-sm md:text-base leading-relaxed line-clamp-4 mb-6 font-body">
                 {extractText(journal.content)}
               </p>
 
               {journal.image && (
-                <div className="w-full h-32 md:h-32 rounded-2xl overflow-hidden mb-4 border border-zinc-100 dark:border-zinc-800">
-                  <img src={journal.image} alt={journal.title} className="w-full h-full object-cover" loading="lazy" />
+                <div className="relative aspect-[26/10] w-full rounded-2xl overflow-hidden mb-6">
+                  <img src={journal.image} alt={journal.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
                 </div>
               )}
 

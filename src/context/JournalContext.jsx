@@ -5,20 +5,31 @@ const JournalContext = createContext();
 
 // Storage configuration
 localforage.config({
-    name: 'the-archive-app',
-    storeName: 'journals_v1',
-    description: 'IndexedDB storage for The Archive personal journal entries and user preferences.'
+  name: 'the-archive-app',
+  storeName: 'journals_v1',
+  description: 'IndexedDB storage for The Archive personal journal entries and user preferences.'
 });
 
 const initialJournals = [
   {
     id: 1,
-    title: "The First Entry",
-    content: "This is where your journey begins. Capture your thoughts, feelings, and memories here in The Archive.",
+    title: "Welcome to The Archive",
+    content: "This is where your journey begins. The Archive is designed to be your private, digital sanctuary for thoughts, memories, and aspirations. To get started, simply tap the 'Capture a moment' button above to create your first entry. You can add images, tags, and even track your mood for every post.",
     date: new Date().toISOString(),
+    image: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80&w=1200",
     mood: "Radiant",
-    tags: ["beginnings"],
+    tags: ["welcome", "tutorial"],
     isFavorite: true
+  },
+  {
+    id: 2,
+    title: "Mountain Silence",
+    content: "The air is thinner up here, but the clarity is worth every step. I spent the afternoon at the summit, watching the clouds roll over the valley. It's a reminder that sometimes you need to gain some altitude to see your life for what it truly is—a vast, beautiful landscape of possibilities.",
+    date: new Date(Date.now() - 86400000).toISOString(),
+    image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=1200",
+    mood: "Reflective",
+    tags: ["nature", "freedom", "mountains"],
+    isFavorite: false
   }
 ];
 
@@ -26,7 +37,7 @@ export const JournalProvider = ({ children }) => {
   const [journals, setJournals] = useState([]);
   const [preferences, setPreferences] = useState({
     theme: 'light',
-    primaryColor: '#f43f5e',
+    primaryColor: '#0ea5e9',
     userName: 'Journaler',
     userEmail: 'user@example.com',
     profilePic: ''
@@ -36,62 +47,62 @@ export const JournalProvider = ({ children }) => {
   // Initial Load from IndexedDB
   useEffect(() => {
     const initializeData = async () => {
-        try {
-            const [savedJournals, savedPreferences] = await Promise.all([
-                localforage.getItem('journals'),
-                localforage.getItem('preferences')
-            ]);
+      try {
+        const [savedJournals, savedPreferences] = await Promise.all([
+          localforage.getItem('journals'),
+          localforage.getItem('preferences')
+        ]);
 
-            // Migration from LocalStorage (if any)
-            const legacyJournals = localStorage.getItem('journals');
-            const legacyPrefs = localStorage.getItem('preferences');
+        // Migration from LocalStorage (if any)
+        const legacyJournals = localStorage.getItem('journals');
+        const legacyPrefs = localStorage.getItem('preferences');
 
-            if (!savedJournals && legacyJournals) {
-                try {
-                    const migrated = JSON.parse(legacyJournals);
-                    if (Array.isArray(migrated)) {
-                        setJournals(migrated);
-                        await localforage.setItem('journals', migrated);
-                    } else {
-                        setJournals(initialJournals);
-                    }
-                } catch (e) {
-                    console.warn("Failed to migrate legacy journals:", e);
-                    setJournals(initialJournals);
-                }
-                localStorage.removeItem('journals'); 
-            } else if (savedJournals) {
-                setJournals(savedJournals);
+        if (!savedJournals && legacyJournals) {
+          try {
+            const migrated = JSON.parse(legacyJournals);
+            if (Array.isArray(migrated)) {
+              setJournals(migrated);
+              await localforage.setItem('journals', migrated);
             } else {
-                setJournals(initialJournals);
-                await localforage.setItem('journals', initialJournals);
+              setJournals(initialJournals);
             }
-
-            if (!savedPreferences && legacyPrefs) {
-                try {
-                    const migrated = JSON.parse(legacyPrefs);
-                    if (migrated && typeof migrated === 'object') {
-                        setPreferences(prev => ({ ...prev, ...migrated }));
-                        await localforage.setItem('preferences', { ...preferences, ...migrated });
-                    }
-                } catch (e) {
-                    console.warn("Failed to migrate legacy preferences:", e);
-                }
-                localStorage.removeItem('preferences');
-            } else if (savedPreferences) {
-                setPreferences(savedPreferences);
-                // Apply theme immediately
-                if (savedPreferences.theme === 'dark') document.documentElement.classList.add('dark');
-                if (savedPreferences.primaryColor) {
-                    document.documentElement.style.setProperty('--primary-color', savedPreferences.primaryColor);
-                }
-            }
-        } catch (err) {
-            console.error("Failed to load journals from IndexedDB:", err);
+          } catch (e) {
+            console.warn("Failed to migrate legacy journals:", e);
             setJournals(initialJournals);
-        } finally {
-            setLoading(false);
+          }
+          localStorage.removeItem('journals');
+        } else if (savedJournals) {
+          setJournals(savedJournals);
+        } else {
+          setJournals(initialJournals);
+          await localforage.setItem('journals', initialJournals);
         }
+
+        if (!savedPreferences && legacyPrefs) {
+          try {
+            const migrated = JSON.parse(legacyPrefs);
+            if (migrated && typeof migrated === 'object') {
+              setPreferences(prev => ({ ...prev, ...migrated }));
+              await localforage.setItem('preferences', { ...preferences, ...migrated });
+            }
+          } catch (e) {
+            console.warn("Failed to migrate legacy preferences:", e);
+          }
+          localStorage.removeItem('preferences');
+        } else if (savedPreferences) {
+          setPreferences(savedPreferences);
+          // Apply theme immediately
+          if (savedPreferences.theme === 'dark') document.documentElement.classList.add('dark');
+          if (savedPreferences.primaryColor) {
+            document.documentElement.style.setProperty('--primary-color', savedPreferences.primaryColor);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load journals from IndexedDB:", err);
+        setJournals(initialJournals);
+      } finally {
+        setLoading(false);
+      }
     };
 
     initializeData();
@@ -106,7 +117,7 @@ export const JournalProvider = ({ children }) => {
   useEffect(() => {
     if (loading) return;
     localforage.setItem('preferences', preferences).catch(console.error);
-    
+
     // Theme application logic
     if (preferences.theme === 'dark') {
       document.documentElement.classList.add('dark');
@@ -150,12 +161,12 @@ export const JournalProvider = ({ children }) => {
 
   if (loading) {
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-zinc-50 dark:bg-black z-[1000]">
-            <div className="flex flex-col items-center gap-4">
-                <div className="w-12 h-12 border-4 border-primary-500/20 border-t-primary-500 rounded-full animate-spin" />
-                <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">Restoring Memories...</span>
-            </div>
+      <div className="fixed inset-0 flex items-center justify-center bg-zinc-50 dark:bg-black z-[1000]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-primary-500/20 border-t-primary-500 rounded-full animate-spin" />
+          <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">Restoring Memories...</span>
         </div>
+      </div>
     );
   }
 

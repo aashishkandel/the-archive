@@ -31,7 +31,7 @@ button:focus {
 }
 
 :root {
-  --primary-color: #f43f5e;
+  --primary-color: #0ea5e9;
   --secondary-color: var(--color-primary-400);
 }
 
