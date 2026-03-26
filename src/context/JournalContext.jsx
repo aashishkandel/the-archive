@@ -13,23 +13,12 @@ localforage.config({
 const initialJournals = [
   {
     id: 1,
-    title: "Lake Reflection Therapy",
-    content: "The water was perfectly still today. It's rare to find that kind of silence in the city. I felt a sense of immense calm that I hadn't experienced in weeks. The sunset reflecting off the surface was breathtaking.",
-    date: new Date(Date.now() - 86400000).toISOString(),
+    title: "The First Entry",
+    content: "This is where your journey begins. Capture your thoughts, feelings, and memories here in The Archive.",
+    date: new Date().toISOString(),
     mood: "Radiant",
-    tags: ["nature", "solitude"],
-    image: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&q=80&w=800",
+    tags: ["beginnings"],
     isFavorite: true
-  },
-  {
-    id: 2,
-    title: "Morning Brew & Ideation",
-    content: "Finally started sketching out the new project. The smell of roasted beans always gets the creative gears turning. The cafe was quiet, just the way I like it for focus work.",
-    date: new Date(Date.now() - 259200000).toISOString(),
-    mood: "Calm",
-    tags: ["work", "coffee"],
-    image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=800",
-    isFavorite: false
   }
 ];
 

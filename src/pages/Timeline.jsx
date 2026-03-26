@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useJournal } from '../context/JournalContext';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ChevronRight, Heart, Hash, Sparkles, SlidersHorizontal, ArrowUpDown, Filter, Sun, Moon, Activity } from 'lucide-react';
+import { Search, ChevronRight, Heart, Hash, Sparkles, SlidersHorizontal, ArrowUpDown, Sun, Moon, Activity } from 'lucide-react';
 
 const Timeline = () => {
   const { journals } = useJournal();

@@ -3,7 +3,7 @@ import Navigation from './Navigation';
 import { useJournal } from '../context/JournalContext';
 
 const Layout = ({ children }) => {
-  const { preferences } = useJournal();
+  useJournal();
 
   return (
     <div className={`min-h-[100dvh] transition-colors duration-500 bg-zinc-50 dark:bg-black selection:bg-primary-500/30 overflow-x-hidden`}>

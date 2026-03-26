@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useJournal } from '../context/JournalContext';
 import { motion } from 'framer-motion';
-import { BarChart2, Heart, Image as ImageIcon, Sparkles, Activity, Hash, Calendar, PieChart, Sun, Moon } from 'lucide-react';
+import { BarChart2, Heart, Image as ImageIcon, Sparkles, Activity, Hash, Calendar, PieChart } from 'lucide-react';
 
 const Insights = () => {
   const { journals } = useJournal();

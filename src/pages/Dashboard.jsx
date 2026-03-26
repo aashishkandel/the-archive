@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useJournal } from '../context/JournalContext';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, PenLine, Heart, MapPin, Sparkles, ChevronRight } from 'lucide-react';
+import { PenLine, Heart, Sparkles, ChevronRight } from 'lucide-react';
 
 const Dashboard = () => {
   const { journals, preferences } = useJournal();
