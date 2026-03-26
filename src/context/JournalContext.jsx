@@ -27,9 +27,9 @@ export const JournalProvider = ({ children }) => {
   const [preferences, setPreferences] = useState({
     theme: 'light',
     primaryColor: '#f43f5e',
-    userName: 'Alex',
-    userEmail: 'alex.j@archive.io',
-    profilePic: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=400'
+    userName: 'Journaler',
+    userEmail: 'user@example.com',
+    profilePic: ''
   });
   const [loading, setLoading] = useState(true);
 
