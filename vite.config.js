@@ -6,37 +6,41 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig({
   plugins: [
     react(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['apple-touch-icon.png'],
-      manifest: {
-        name: 'The Archive | Minimalist Journal',
-        short_name: 'Archive',
-        description: 'A minimalist, mobile-first personal journaling experience.',
-        theme_color: '#f43f5e',
-        background_color: '#ffffff',
-        display: 'standalone',
-        orientation: 'portrait',
-        icons: [
-          {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable'
-          }
-        ]
-      }
-    })
+      VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['apple-touch-icon.png'],
+        appleMobileWebAppCapable: false,
+        manifest: {
+          name: 'The Archive | Minimalist Journal',
+          short_name: 'Archive',
+          description: 'A minimalist, mobile-first personal journaling experience.',
+          theme_color: '#f43f5e',
+          background_color: '#ffffff',
+          display: 'standalone',
+          orientation: 'portrait',
+          icons: [
+            {
+              src: 'pwa-192x192.png',
+              sizes: '192x192',
+              type: 'image/png'
+            },
+            {
+              src: 'pwa-512x512.png',
+              sizes: '512x512',
+              type: 'image/png'
+            },
+            {
+              src: 'pwa-512x512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'any maskable'
+            }
+          ]
+        },
+        devOptions: {
+          enabled: true
+        }
+      })
   ],
   server: {
     port: 5173,

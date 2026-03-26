@@ -2,11 +2,12 @@ import React, { useState, useMemo } from 'react';
 import { useJournal } from '../context/JournalContext';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ChevronRight, Heart, Hash, Sparkles, SlidersHorizontal, ArrowUpDown, Sun, Moon, Activity } from 'lucide-react';
+import { Search, ChevronRight, Heart, Hash, Sparkles, SlidersHorizontal, ArrowUpDown, Sun, Moon, Activity, ArrowRight } from 'lucide-react';
 
 const Timeline = () => {
   const { journals } = useJournal();
   const [search, setSearch] = useState('');
+  const deferredSearch = React.useDeferredValue(search);
   const [selectedTag, setSelectedTag] = useState(null);
   const [selectedMood, setSelectedMood] = useState(null);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
@@ -31,8 +32,8 @@ const Timeline = () => {
         ? j.content.filter(b => b.type === 'text').map(b => b.content).join(' ')
         : (j.content || '');
 
-      const matchesSearch = j.title?.toLowerCase().includes(search.toLowerCase()) ||
-        textContent.toLowerCase().includes(search.toLowerCase());
+      const matchesSearch = j.title?.toLowerCase().includes(deferredSearch.toLowerCase()) ||
+        textContent.toLowerCase().includes(deferredSearch.toLowerCase());
 
       const matchesTag = !selectedTag || j.tags?.includes(selectedTag);
       const matchesMood = !selectedMood || j.mood === selectedMood;
@@ -44,7 +45,7 @@ const Timeline = () => {
       const dateB = new Date(b.date);
       return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
     });
-  }, [journals, search, selectedTag, selectedMood, showFavoritesOnly, sortOrder]);
+  }, [journals, deferredSearch, selectedTag, selectedMood, showFavoritesOnly, sortOrder]);
 
   // Group by month/year
   const groupedJournals = useMemo(() => {
@@ -69,22 +70,22 @@ const Timeline = () => {
         id="archive-header"
       >
         <div className="flex items-center justify-between gap-4 mb-4">
-          <div className="flex items-baseline gap-2">
-            <h2 className="text-2xl md:text-5xl font-headline font-black tracking-tight text-zinc-900 dark:text-zinc-50">Archive</h2>
-            <span className="hidden md:block text-zinc-400 font-medium text-sm">/ history</span>
-          </div>
+              <div className="flex flex-col">
+                <h1 className="text-3xl md:text-5xl font-headline font-black text-zinc-900 dark:text-zinc-50 tracking-tight leading-none">The Archive</h1>
+                <p className="text-zinc-500 font-medium text-sm md:text-base mt-2 opacity-90">A journey through your thoughts and moments.</p>
+              </div>
           <div className="flex gap-2">
             <button
               onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-              className={`p-2.5 rounded-xl transition-all border shadow-sm flex items-center gap-2 font-bold text-[10px] uppercase tracking-widest cursor-pointer
-                    ${showFavoritesOnly ? 'bg-rose-500 border-rose-500 text-white shadow-rose-500/20' : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-400 hover:text-rose-500'}`}
+              className={`p-2.5 rounded-2xl transition-all border shadow-sm flex items-center gap-2 font-bold text-[10px] uppercase tracking-widest cursor-pointer
+                    ${showFavoritesOnly ? 'bg-primary-600 border-primary-600 text-white shadow-primary-600/20' : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-400 hover:text-primary-600'}`}
             >
               <Heart size={16} fill={showFavoritesOnly ? 'currentColor' : 'none'} />
               <span className="hidden sm:inline">Favs</span>
             </button>
             <button
               onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
-              className="p-2.5 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 text-zinc-400 hover:text-primary-500 transition-all shadow-sm flex items-center gap-2 font-bold text-[10px] uppercase tracking-widest cursor-pointer"
+              className="p-2.5 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 text-zinc-400 hover:text-primary-500 transition-all shadow-sm flex items-center gap-2 font-bold text-[10px] uppercase tracking-widest cursor-pointer"
             >
               <ArrowUpDown size={16} className={sortOrder === 'asc' ? 'rotate-180 transition-transform' : 'transition-transform'} />
               <span className="hidden sm:inline">{sortOrder === 'desc' ? 'New' : 'Old'}</span>
@@ -100,7 +101,7 @@ const Timeline = () => {
               placeholder="Search memories..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800/60 rounded-2xl py-3 pl-11 pr-4 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/5 transition-all text-sm md:text-base shadow-sm"
+              className="w-full bg-white dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800/60 rounded-3xl py-3 pl-11 pr-4 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/5 transition-all text-sm md:text-base shadow-sm"
             />
           </div>
 
@@ -139,7 +140,7 @@ const Timeline = () => {
                   <button
                     key={mood}
                     onClick={() => setSelectedMood(isActive ? null : mood)}
-                    className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border shadow-sm cursor-pointer
+                    className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border shadow-sm cursor-pointer
                         ${isActive ? `${config.bg} text-white border-transparent` : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-500'}`}
                   >
                     <Icon size={12} className={isActive ? '' : config.color} />
@@ -152,7 +153,7 @@ const Timeline = () => {
                 <button
                   key={tag}
                   onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                  className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all border shadow-sm cursor-pointer
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-[10px] font-bold uppercase tracking-wider transition-all border shadow-sm cursor-pointer
                       ${selectedTag === tag ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-transparent shadow-md' : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-500'}`}
                 >
                   <Hash size={12} />
@@ -203,19 +204,19 @@ const Timeline = () => {
                     transition={{ duration: 0.4, delay: idx * 0.03 }}
                     className="group"
                   >
-                    <Link to={`/edit/${journal.id}`} className="block relative h-full">
-                      <div className="bg-white dark:bg-zinc-900 rounded-[2rem] md:rounded-[2.5rem] p-5 md:p-7 shadow-sm border border-zinc-100 dark:border-zinc-800/80 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-500 h-full flex flex-col gap-5 relative overflow-hidden">
+                    <Link to={`/edit/${journal.id}`} className="block relative h-auto">
+                      <div className="bg-white dark:bg-zinc-900 rounded-3xl p-4 md:p-5 shadow-sm border border-zinc-100 dark:border-zinc-800/80 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-500 flex flex-col gap-3 relative overflow-hidden">
 
                         {/* Decoration */}
                         <div className="absolute top-0 right-0 w-24 h-24 bg-primary-500/5 rounded-full -mr-12 -mt-12 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                         <div className="flex justify-between items-start z-10">
                           <div className="flex gap-3 md:gap-4 items-center">
-                            <div className="flex flex-col items-center justify-center w-11 h-11 md:w-14 md:h-14 bg-zinc-50 dark:bg-zinc-800 rounded-xl md:rounded-2xl border border-zinc-100 dark:border-zinc-700 shadow-inner group-hover:bg-primary-500 transition-colors duration-500">
-                              <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-white/70">
+                            <div className="flex flex-col items-center justify-center w-11 h-11 md:w-14 md:h-14 bg-zinc-50 dark:bg-zinc-800 rounded-2xl border border-zinc-100 dark:border-zinc-700 shadow-inner group-hover:bg-primary-500 transition-colors duration-500 font-body text-primary-700 dark:text-primary-400">
+                              <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest group-hover:text-white/70">
                                 {new Date(journal.date).toLocaleDateString('en-US', { weekday: 'short' })}
                               </span>
-                              <span className="text-xl md:text-2xl font-headline font-black text-zinc-900 dark:text-zinc-100 group-hover:text-white leading-tight">
+                              <span className="text-sm md:text-lg font-black leading-none mt-0.5 group-hover:text-white">
                                 {new Date(journal.date).getDate()}
                               </span>
                             </div>
@@ -237,11 +238,12 @@ const Timeline = () => {
                         </div>
 
                         {journal.image && (
-                          <div className="relative aspect-video md:aspect-[4/3] rounded-[1.4rem] md:rounded-[1.8rem] overflow-hidden border border-zinc-100 dark:border-zinc-800 shadow-sm">
+                          <div className="relative aspect-video md:aspect-[2.6/1] rounded-2xl overflow-hidden border border-zinc-100 dark:border-zinc-800 shadow-sm">
                             <img
                               src={journal.image}
                               alt=""
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-out"
+                              loading="lazy"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                           </div>
@@ -258,7 +260,7 @@ const Timeline = () => {
                         {journal.tags && journal.tags.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 pt-3 border-t border-zinc-50 dark:border-zinc-800/40 z-10">
                             {journal.tags.slice(0, 3).map(tag => (
-                              <span key={tag} className="text-[8px] md:text-[9px] font-black uppercase tracking-wider text-zinc-400">
+                             <span key={tag} className="text-[8px] md:text-[9px] font-black uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
                                 #{tag}
                               </span>
                             ))}
@@ -267,9 +269,8 @@ const Timeline = () => {
                             )}
                           </div>
                         )}
-
-                        <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-20 translate-x-1 group-hover:translate-x-0 transition-all duration-500 pointer-events-none">
-                          <ChevronRight size={24} className="text-primary-500 md:w-10 md:h-10" />
+                        <div className="absolute bottom-5 right-5 text-primary-500 opacity-0 group-hover:opacity-100 transition-all translate-x-1 group-hover:translate-x-0 duration-500 pointer-events-none">
+                          <ArrowRight size={20} />
                         </div>
                       </div>
                     </Link>
@@ -281,7 +282,7 @@ const Timeline = () => {
         ))}
 
         {Object.keys(groupedJournals).length === 0 && (
-          <div className="text-center py-32 px-4 bg-zinc-100 dark:bg-zinc-900/50 rounded-[3rem] border border-dashed border-zinc-200 dark:border-zinc-800">
+          <div className="text-center py-32 px-4 bg-zinc-100 dark:bg-zinc-900/50 rounded-3xl border border-dashed border-zinc-200 dark:border-zinc-800">
             <div className="w-16 h-16 bg-zinc-200 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-6 text-zinc-400">
               <Search size={32} />
             </div>

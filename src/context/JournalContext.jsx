@@ -118,25 +118,35 @@ export const JournalProvider = ({ children }) => {
     }
   }, [preferences, loading]);
 
-  const addJournal = (entry) => {
+  const addJournal = React.useCallback((entry) => {
     setJournals(prev => [entry, ...prev]);
-  };
+  }, []);
 
-  const updateJournal = (updated) => {
+  const updateJournal = React.useCallback((updated) => {
     setJournals(prev => prev.map(j => j.id === updated.id ? updated : j));
-  };
+  }, []);
 
-  const deleteJournal = (id) => {
+  const deleteJournal = React.useCallback((id) => {
     setJournals(prev => prev.filter(j => j.id !== id));
-  };
+  }, []);
 
-  const toggleFavorite = (id) => {
+  const toggleFavorite = React.useCallback((id) => {
     setJournals(prev => prev.map(j => j.id === id ? { ...j, isFavorite: !j.isFavorite } : j));
-  };
+  }, []);
 
-  const updatePreferences = (newPrefs) => {
+  const updatePreferences = React.useCallback((newPrefs) => {
     setPreferences(prev => ({ ...prev, ...newPrefs }));
-  };
+  }, []);
+
+  const value = React.useMemo(() => ({
+    journals,
+    addJournal,
+    updateJournal,
+    deleteJournal,
+    toggleFavorite,
+    preferences,
+    updatePreferences
+  }), [journals, preferences, addJournal, updateJournal, deleteJournal, toggleFavorite, updatePreferences]);
 
   if (loading) {
     return (
@@ -150,15 +160,7 @@ export const JournalProvider = ({ children }) => {
   }
 
   return (
-    <JournalContext.Provider value={{
-      journals,
-      addJournal,
-      updateJournal,
-      deleteJournal,
-      toggleFavorite,
-      preferences,
-      updatePreferences
-    }}>
+    <JournalContext.Provider value={value}>
       {children}
     </JournalContext.Provider>
   );

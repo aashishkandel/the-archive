@@ -79,8 +79,8 @@ const Insights = () => {
           { label: 'Favorites', value: stats.favorites, icon: Heart, color: 'text-rose-500', bg: 'bg-rose-50 dark:bg-rose-900/20' },
           { label: 'Photos', value: stats.withImages, icon: ImageIcon, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' }
         ].map((stat) => (
-          <div key={stat.label} className="bg-white dark:bg-zinc-900 p-5 rounded-[2rem] shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col items-start gap-4 hover:scale-[1.02] transition-transform cursor-pointer">
-            <div className={`w-10 h-10 ${stat.bg} ${stat.color} rounded-xl flex items-center justify-center`}>
+          <div key={stat.label} className="bg-white dark:bg-zinc-900 p-5 rounded-3xl shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col items-start gap-4 hover:scale-[1.02] transition-transform cursor-pointer">
+            <div className={`w-10 h-10 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center`}>
               <stat.icon size={20} strokeWidth={2.5} />
             </div>
             <div>
@@ -93,7 +93,7 @@ const Insights = () => {
 
       {/* Mood Resonance & Tags Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <motion.section variants={itemVariants} className="lg:col-span-8 bg-zinc-900 dark:bg-black rounded-[2.5rem] p-6 md:p-8 shadow-premium relative overflow-hidden text-white flex flex-col justify-between min-h-[350px] border border-zinc-800">
+          <motion.section variants={itemVariants} className="lg:col-span-8 bg-zinc-900 dark:bg-black rounded-3xl p-6 md:p-8 shadow-premium relative overflow-hidden text-white flex flex-col justify-between min-h-[350px] border border-zinc-800">
             <div className="relative z-10 space-y-8 h-full flex flex-col">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-400">
@@ -130,6 +130,8 @@ const Insights = () => {
                         return { x, y, mood: e.mood, date: new Date(e.date).toLocaleDateString() };
                     });
 
+                    if (points.some(p => isNaN(p.x) || isNaN(p.y))) return null;
+
                     const d = `M ${points[0].x} ${points[0].y} ` + points.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ');
                     const areaD = d + ` L ${points[points.length-1].x} ${height} L ${points[0].x} ${height} Z`;
 
@@ -137,14 +139,14 @@ const Insights = () => {
                         <div className="w-full h-full relative group">
                             <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible drop-shadow-[0_0_15px_rgba(244,63,94,0.3)]">
                                 <path 
-                                    d={areaD} 
+                                    d={areaD || ""} 
                                     className="fill-primary-500/5 stroke-none" 
                                 />
                                 <motion.path 
                                     initial={{ pathLength: 0 }}
                                     animate={{ pathLength: 1 }}
                                     transition={{ duration: 1.5, ease: "easeInOut" }}
-                                    d={d} 
+                                    d={d || ""} 
                                     fill="none" 
                                     stroke="currentColor" 
                                     strokeWidth="4" 
@@ -193,7 +195,7 @@ const Insights = () => {
           </motion.section>
 
           {/* Top Tags */}
-          <motion.section variants={itemVariants} className="lg:col-span-4 bg-white dark:bg-zinc-900 rounded-[2.5rem] p-6 shadow-sm border border-zinc-100 dark:border-zinc-800 space-y-6">
+          <motion.section variants={itemVariants} className="lg:col-span-4 bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-sm border border-zinc-100 dark:border-zinc-800 space-y-6">
             <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
                 <PieChart size={14} className="text-primary-500" />
                 Dominant Subjects

@@ -114,27 +114,15 @@ const Navigation = () => {
 
                 {/* Animated Liquid Underline */}
                 <div className="w-full h-4 -mt-1 opacity-0 group-hover:opacity-100 transition-all duration-700 pointer-events-none">
-                  <svg viewBox="0 0 100 20" preserveAspectRatio="none" className="w-full h-full text-primary-500">
-                    <motion.path
-                      d="M 0 10 C 25 2, 25 18, 50 10 C 75 2, 75 18, 100 10"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      animate={{
-                        d: [
-                          "M 0 10 C 25 2, 25 18, 50 10 C 75 2, 75 18, 100 10",
-                          "M 0 10 C 25 18, 25 2, 50 10 C 75 18, 75 2, 100 10",
-                          "M 0 10 C 25 2, 25 18, 50 10 C 75 2, 75 18, 100 10",
-                        ]
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                    />
-                  </svg>
+                    <svg viewBox="0 0 100 20" preserveAspectRatio="none" className="w-full h-full text-primary-500">
+                      <path
+                        d="M 0 10 C 25 2, 25 18, 50 10 C 75 2, 75 18, 100 10"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                      />
+                    </svg>
                 </div>
               </div>
             </NavLink>

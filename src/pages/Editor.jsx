@@ -6,6 +6,54 @@ import {
   ChevronLeft, Image as ImageIcon, X, Sparkles, Hash, Activity, Sun, Moon, Cloud, Zap, Leaf, Minus
 } from 'lucide-react';
 
+const MoodItem = React.memo(({ m, config, isActive, onClick }) => {
+  const Icon = config.icon;
+  return (
+    <button
+      onClick={onClick}
+      className={`flex flex-col items-center gap-4 group transition-all duration-500 cursor-pointer ${isActive ? 'scale-110' : 'opacity-70 hover:opacity-100 hover:translate-y-[-4px]'}`}
+    >
+      <div className={`w-14 h-14 md:w-16 md:h-16 rounded-[2rem_0.8rem_2rem_0.8rem] flex items-center justify-center transition-all duration-500 bg-white dark:bg-zinc-800 border-2 ${isActive ? `border-current shadow-2xl scale-110 translate-y-[-8px]` : `${config.border} shadow-lg`} ${config.color} ring-offset-4 ring-offset-white dark:ring-offset-zinc-950`}>
+        <Icon size={isActive ? 28 : 24} strokeWidth={isActive ? 3 : 2} className={`${isActive ? '' : 'text-zinc-500'} transition-all`} />
+      </div>
+      <span className={`text-[8px] font-black uppercase tracking-[0.2em] font-headline ${isActive ? config.color : 'text-zinc-600 dark:text-zinc-400'}`}>
+        {m}
+      </span>
+    </button>
+  );
+});
+
+const Block = React.memo(({ block, updateTextBlock, removeBlock, handleTextareaResize, isOnlyBlock }) => {
+  if (block.type === 'text') {
+    return (
+      <textarea
+        value={block.content}
+        onChange={(e) => {
+          updateTextBlock(block.id, e.target.value);
+          handleTextareaResize(e);
+        }}
+        onInput={handleTextareaResize}
+        onFocus={handleTextareaResize}
+        placeholder={isOnlyBlock ? "What's on your mind today?" : "Continue writing..."}
+        className="w-full min-h-[40px] text-lg md:text-xl font-body text-zinc-800 dark:text-zinc-200 leading-relaxed placeholder:text-zinc-300 dark:placeholder:text-zinc-700 bg-transparent border-none appearance-none outline-none focus:outline-none focus:ring-0 p-0 resize-none selection:bg-primary-500/30 overflow-hidden"
+      />
+    );
+  } else if (block.type === 'image') {
+    return (
+      <div className="relative group overflow-hidden my-4 flex justify-center">
+        <img src={block.url} alt="Memory" className="max-w-full max-h-[60vh] object-contain rounded-[1.5rem]" loading="lazy" />
+        <button
+          onClick={() => removeBlock(block.id)}
+          className="absolute top-4 right-4 w-10 h-10 bg-black/50 backdrop-blur-xl rounded-full flex items-center justify-center text-white active:scale-90 transition-transform md:opacity-0 group-hover:opacity-100 cursor-pointer"
+        >
+          <X size={18} />
+        </button>
+      </div>
+    );
+  }
+  return null;
+});
+
 const Editor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -25,7 +73,6 @@ const Editor = () => {
   ]);
 
   const [showMoods, setShowMoods] = useState(false);
-  const moods = ['Radiant', 'Calm', 'Grounded', 'Quiet', 'Flow', 'Fired Up', 'Neutral'];
 
   useEffect(() => {
     if (id) {
@@ -60,13 +107,11 @@ const Editor = () => {
   }, [id, journals]);
 
   const handleSave = () => {
-    // Filter out empty text blocks unless it's the only block
     let finalBlocks = blocks.filter(b => b.type === 'image' || (b.type === 'text' && b.content.trim() !== ''));
     if (finalBlocks.length === 0) {
       finalBlocks = [{ id: Date.now().toString(), type: 'text', content: '' }];
     }
 
-    // Extract first image to act as the cover image for feeds
     const coverImage = finalBlocks.find(b => b.type === 'image')?.url || null;
 
     const finalEntry = {
@@ -83,36 +128,42 @@ const Editor = () => {
     navigate(-1);
   };
 
-  const updateTextBlock = (id, newContent) => {
-    setBlocks(blocks.map(b => b.id === id ? { ...b, content: newContent } : b));
-  };
+  const updateTextBlock = React.useCallback((id, newContent) => {
+    setBlocks(prev => prev.map(b => b.id === id ? { ...b, content: newContent } : b));
+  }, []);
 
-  const removeBlock = (id) => {
-    const newBlocks = blocks.filter(b => b.id !== id);
-    if (newBlocks.length === 0) {
-      setBlocks([{ id: Date.now().toString(), type: 'text', content: '' }]);
-    } else {
-      setBlocks(newBlocks);
-    }
-  };
+  const removeBlock = React.useCallback((id) => {
+    setBlocks(prev => {
+        const newBlocks = prev.filter(b => b.id !== id);
+        return newBlocks.length === 0 ? [{ id: Date.now().toString(), type: 'text', content: '' }] : newBlocks;
+    });
+  }, []);
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        // Find last text block to insert after, or just append
-        setBlocks([...blocks, { id: Date.now().toString(), type: 'image', url: reader.result }, { id: Date.now().toString() + '-t', type: 'text', content: '' }]);
-        // scroll to bottom could be added here
+        setBlocks(prev => [...prev, { id: Date.now().toString(), type: 'image', url: reader.result }, { id: Date.now().toString() + '-t', type: 'text', content: '' }]);
       };
       reader.readAsDataURL(file);
     }
     e.target.value = null; // reset
   };
 
-  const handleTextareaResize = (e) => {
+  const handleTextareaResize = React.useCallback((e) => {
     e.target.style.height = 'auto';
     e.target.style.height = e.target.scrollHeight + 'px';
+  }, []);
+
+  const moodConfigs = {
+    'Radiant': { icon: Sun, color: 'text-amber-500', glow: 'shadow-amber-500/20', bg: 'bg-amber-500/5', border: 'border-amber-500/30' },
+    'Calm': { icon: Moon, color: 'text-sky-500', glow: 'shadow-sky-500/20', bg: 'bg-sky-500/5', border: 'border-sky-500/30' },
+    'Grounded': { icon: Leaf, color: 'text-emerald-500', glow: 'shadow-emerald-500/20', bg: 'bg-emerald-500/5', border: 'border-emerald-500/30' },
+    'Quiet': { icon: Cloud, color: 'text-indigo-400', glow: 'shadow-indigo-400/20', bg: 'bg-indigo-400/5', border: 'border-indigo-400/30' },
+    'Flow': { icon: Activity, color: 'text-rose-400', glow: 'shadow-rose-400/20', bg: 'bg-rose-400/5', border: 'border-rose-400/30' },
+    'Fired Up': { icon: Zap, color: 'text-orange-500', glow: 'shadow-orange-500/20', bg: 'bg-orange-500/5', border: 'border-orange-500/30' },
+    'Neutral': { icon: Minus, color: 'text-zinc-500', glow: 'shadow-zinc-500/20', bg: 'bg-zinc-500/5', border: 'border-zinc-500/30' }
   };
 
   return (
@@ -122,7 +173,6 @@ const Editor = () => {
       exit={{ opacity: 0, y: 20 }}
       className="fixed inset-0 z-[100] bg-white dark:bg-black flex flex-col md:max-w-screen-md md:mx-auto md:relative md:inset-auto md:min-h-[90vh] md:mt-10 md:rounded-[3rem] md:shadow-2xl overflow-hidden"
     >
-      {/* Absolute Header - Minimal Native Style */}
       <header className="flex items-center justify-between px-4 h-16 border-b border-zinc-100 dark:border-zinc-800/50 bg-white/95 dark:bg-black/95 backdrop-blur-xl z-20 pt-safe shrink-0">
         <button
           onClick={() => navigate(-1)}
@@ -142,9 +192,7 @@ const Editor = () => {
         </button>
       </header>
 
-      {/* Scrollable Document Area */}
       <main className="flex-1 overflow-y-auto w-full max-w-2xl mx-auto px-6 pt-10 pb-32 no-scrollbar scroll-smooth">
-        {/* Title Field */}
         <input
           type="text"
           placeholder="Title"
@@ -153,7 +201,6 @@ const Editor = () => {
           className="w-full text-4xl font-headline font-extrabold text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-200 dark:placeholder:text-zinc-800 bg-transparent border-none appearance-none outline-none focus:outline-none focus:ring-0 p-0 mb-4 leading-tight selection:bg-primary-500/30"
         />
 
-        {/* Minimal Tags Bar */}
         <div className="flex flex-wrap gap-3 mb-10 items-center">
           <div className="flex items-center gap-2 text-zinc-300 dark:text-zinc-700">
             <Hash size={18} />
@@ -199,46 +246,21 @@ const Editor = () => {
           </div>
         </div>
 
-        {/* Text Area Content */}
         <div className="space-y-6">
-          {blocks.map((block) => {
-            if (block.type === 'text') {
-              return (
-                <textarea
-                  key={block.id}
-                  value={block.content}
-                  onChange={(e) => {
-                    updateTextBlock(block.id, e.target.value);
-                    handleTextareaResize(e);
-                  }}
-                  onInput={handleTextareaResize}
-                  onFocus={handleTextareaResize}
-                  placeholder={blocks.length === 1 ? "What's on your mind today?" : "Continue writing..."}
-                  className="w-full min-h-[40px] text-lg md:text-xl font-body text-zinc-800 dark:text-zinc-200 leading-relaxed placeholder:text-zinc-300 dark:placeholder:text-zinc-700 bg-transparent border-none appearance-none outline-none focus:outline-none focus:ring-0 p-0 resize-none selection:bg-primary-500/30 overflow-hidden"
-                />
-              );
-            } else if (block.type === 'image') {
-              return (
-                <div key={block.id} className="relative group overflow-hidden my-4 flex justify-center">
-                  <img src={block.url} alt="Memory" className="max-w-full max-h-[60vh] object-contain rounded-[1.5rem]" />
-                  <button
-                    onClick={() => removeBlock(block.id)}
-                    className="absolute top-4 right-4 w-10 h-10 bg-black/50 backdrop-blur-xl rounded-full flex items-center justify-center text-white active:scale-90 transition-transform md:opacity-0 group-hover:opacity-100 cursor-pointer"
-                  >
-                    <X size={18} />
-                  </button>
-                </div>
-              );
-            }
-            return null;
-          })}
+          {blocks.map((block) => (
+            <Block 
+              key={block.id} 
+              block={block} 
+              updateTextBlock={updateTextBlock} 
+              removeBlock={removeBlock} 
+              handleTextareaResize={handleTextareaResize}
+              isOnlyBlock={blocks.length === 1}
+            />
+          ))}
         </div>
       </main>
 
-      {/* Modern Vibe Utility Bar */}
       <div className="bg-white/95 dark:bg-zinc-950/95 backdrop-blur-2xl pb-safe z-20 shrink-0">
-
-        {/* Vibe Selection Sheet */}
         <AnimatePresence>
           {showMoods && (
             <motion.div
@@ -250,36 +272,15 @@ const Editor = () => {
               <div className="p-10">
                 <p className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-400 mb-10 text-center opacity-70">Emotional Context</p>
                 <div className="grid grid-cols-4 md:grid-cols-7 gap-6 max-w-4xl mx-auto items-start">
-                  {(() => {
-                    const moodConfigs = {
-                      'Radiant': { icon: Sun, color: 'text-amber-500', glow: 'shadow-amber-500/20', bg: 'bg-amber-500/5', border: 'border-amber-500/30' },
-                      'Calm': { icon: Moon, color: 'text-sky-500', glow: 'shadow-sky-500/20', bg: 'bg-sky-500/5', border: 'border-sky-500/30' },
-                      'Grounded': { icon: Leaf, color: 'text-emerald-500', glow: 'shadow-emerald-500/20', bg: 'bg-emerald-500/5', border: 'border-emerald-500/30' },
-                      'Quiet': { icon: Cloud, color: 'text-indigo-400', glow: 'shadow-indigo-400/20', bg: 'bg-indigo-400/5', border: 'border-indigo-400/30' },
-                      'Flow': { icon: Activity, color: 'text-rose-400', glow: 'shadow-rose-400/20', bg: 'bg-rose-400/5', border: 'border-rose-400/30' },
-                      'Fired Up': { icon: Zap, color: 'text-orange-500', glow: 'shadow-orange-500/20', bg: 'bg-orange-500/5', border: 'border-orange-500/30' },
-                      'Neutral': { icon: Minus, color: 'text-zinc-500', glow: 'shadow-zinc-500/20', bg: 'bg-zinc-500/5', border: 'border-zinc-500/30' }
-                    };
-
-                    return Object.entries(moodConfigs).map(([m, config]) => {
-                      const Icon = config.icon;
-                      const isActive = entry.mood === m;
-                      return (
-                        <button
-                          key={m}
-                          onClick={() => { setEntry({ ...entry, mood: m }); setShowMoods(false); }}
-                          className={`flex flex-col items-center gap-4 group transition-all duration-500 cursor-pointer ${isActive ? 'scale-110' : 'opacity-70 hover:opacity-100 hover:translate-y-[-4px]'}`}
-                        >
-                          <div className={`w-14 h-14 md:w-16 md:h-16 rounded-[2rem_0.8rem_2rem_0.8rem] flex items-center justify-center transition-all duration-500 bg-white dark:bg-zinc-800 border-2 ${isActive ? `border-current shadow-2xl scale-110 translate-y-[-8px]` : `${config.border} shadow-lg`} ${config.color} ring-offset-4 ring-offset-white dark:ring-offset-zinc-950`}>
-                            <Icon size={isActive ? 28 : 24} strokeWidth={isActive ? 3 : 2} className={`${isActive ? '' : 'text-zinc-500'} transition-all`} />
-                          </div>
-                          <span className={`text-[8px] font-black uppercase tracking-[0.2em] font-headline ${isActive ? config.color : 'text-zinc-600 dark:text-zinc-400'}`}>
-                            {m}
-                          </span>
-                        </button>
-                      );
-                    });
-                  })()}
+                  {Object.entries(moodConfigs).map(([m, config]) => (
+                    <MoodItem 
+                      key={m} 
+                      m={m} 
+                      config={config} 
+                      isActive={entry.mood === m} 
+                      onClick={() => { setEntry({ ...entry, mood: m }); setShowMoods(false); }}
+                    />
+                  ))}
                 </div>
               </div>
             </motion.div>
@@ -287,7 +288,6 @@ const Editor = () => {
         </AnimatePresence>
 
         <div className="flex items-center justify-between px-8 py-8 md:max-w-screen-md mx-auto">
-          {/* 3D Wavy Add Photo Action */}
           <button
             onClick={() => fileInputRef.current?.click()}
             className="flex flex-col items-center gap-2 group active:scale-90 transition-all cursor-pointer"
@@ -298,21 +298,11 @@ const Editor = () => {
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-zinc-50 font-headline">Media</span>
           </button>
 
-          {/* 3D Wavy Feelings Action */}
           <button
             onClick={() => setShowMoods(!showMoods)}
             className="flex flex-col items-center gap-2 group active:scale-90 transition-all cursor-pointer"
           >
             {(() => {
-              const moodConfigs = {
-                'Radiant': { icon: Sun, color: 'text-amber-500', border: 'border-amber-500/30' },
-                'Calm': { icon: Moon, color: 'text-sky-500', border: 'border-sky-500/30' },
-                'Grounded': { icon: Leaf, color: 'text-emerald-500', border: 'border-emerald-500/30' },
-                'Quiet': { icon: Cloud, color: 'text-zinc-400', border: 'border-zinc-400/30' },
-                'Flow': { icon: Activity, color: 'text-rose-400', border: 'border-rose-400/30' },
-                'Fired Up': { icon: Zap, color: 'text-orange-500', border: 'border-orange-500/30' },
-                'Neutral': { icon: Minus, color: 'text-zinc-400', border: 'border-zinc-400/30' }
-              };
               const config = moodConfigs[entry.mood] || { icon: Sparkles, color: 'text-zinc-400', border: 'border-zinc-200' };
               const Icon = config.icon;
               return (
@@ -337,3 +327,4 @@ const Editor = () => {
 };
 
 export default Editor;
+
